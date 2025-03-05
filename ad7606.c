@@ -49,11 +49,7 @@ int ad7606_transfer_frame(struct ad7606_device* device, u8 tx[], u8 rx[], u32 le
         .cs_change = 1
     };
 
-    int status = ioctl(device->fd, SPI_IOC_MESSAGE(1), &spi_transfer);
-    if (status == -1) {
-        perror("ioctl: spi");
-    }
-    return status;
+    return ioctl(device->fd, SPI_IOC_MESSAGE(1), &spi_transfer);
 }
 
 int ad7606_read_register(struct ad7606_device* device, u8 address, u8* data)
@@ -80,19 +76,11 @@ int ad7606_read_register(struct ad7606_device* device, u8 address, u8* data)
 
 int ad7606_write_register(struct ad7606_device* device, u8 address, u8 data)
 {
-    int status;
     u8 tx[2];
-    u8 rx[2];
 
     tx[0] = AD7606_WEN(0) | AD7606_RW(0) | address;
-    tx[1] = 0;
-
-    status = ad7606_transfer_frame(device, tx, NULL, 2);
-    if (status == -1) {
-        return status;
-    }
-
-    return status;
+    tx[1] = data;
+    return ad7606_transfer_frame(device, tx, NULL, 2);
 }
 
 float ad7606_convert_raw_value(u32 raw)
